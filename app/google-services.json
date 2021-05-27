@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "601458399837",
+    "project_id": "sharedlistapp-d7d2b",
+    "storage_bucket": "sharedlistapp-d7d2b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:601458399837:android:13099f277b9029864b0bb4",
+        "android_client_info": {
+          "package_name": "com.example.sharedlistapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "601458399837-nv555u7lltvp90o1lbr06loube4h1mli.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzOK7dE1NSl1ygba96eC77PB7UWilMPBk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "601458399837-nv555u7lltvp90o1lbr06loube4h1mli.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
