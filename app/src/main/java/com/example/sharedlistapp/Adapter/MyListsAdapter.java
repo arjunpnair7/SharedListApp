@@ -18,7 +18,7 @@ import java.util.List;
 public class MyListsAdapter extends RecyclerView.Adapter<MyListsAdapter.ListViewHolder> {
 
     public interface ListItemCallbacks {
-        public void ListItemClicked(String listID);
+        public void ListItemClicked(String listID, String listTitle);
     }
 
     private List<MyLists> userLists;
@@ -73,7 +73,7 @@ public class MyListsAdapter extends RecyclerView.Adapter<MyListsAdapter.ListView
                 @Override
                 public void onClick(View v) {
                     Log.i("listAdapter", uniqueIDs.get(getAdapterPosition()));
-                    callbacks.ListItemClicked(uniqueIDs.get(getAdapterPosition()));
+                    callbacks.ListItemClicked(uniqueIDs.get(getAdapterPosition()), listTitle.getText().toString());
 
                 }
             });

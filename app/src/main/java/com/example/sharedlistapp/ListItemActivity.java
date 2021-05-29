@@ -1,33 +1,29 @@
 package com.example.sharedlistapp;
 
-import android.app.Dialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.renderscript.Sampler;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.sharedlistapp.Adapter.MyListsAdapter;
 import com.example.sharedlistapp.Adapter.MyListsItemsAdapter;
 import com.example.sharedlistapp.Model.MyListItem;
 import com.example.sharedlistapp.Model.MyLists;
@@ -39,67 +35,67 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+public class ListItemActivity extends AppCompatActivity {
 
-public class MyListsFragment extends Fragment implements MyListsAdapter.ListItemCallbacks {
-
-    private RecyclerView recyclerView;
+    private TextView listTitleTv;
+    private RecyclerView listItemsRecyclerView;
     private DatabaseReference databaseReference;
     private FirebaseUser firebaseUser;
-    private List<MyLists> myLists;
-    private List<String> uniqueIDs;
-    private com.google.android.material.floatingactionbutton.FloatingActionButton newListfab;
-    private MyListsAdapter.ListItemCallbacks callbacks;
-    public final static String LIST_ID = "listID";
-    public final static String LIST_TITLE = "listTitle";
-
+    private String listID;
+    private List<MyListItem> listItems;
+    private List<String> itemKeys;
+    private com.google.android.material.floatingactionbutton.FloatingActionButton listItemFAB;
 
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        callbacks = this;
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_my_lists, container, false);
-        recyclerView = view.findViewById(R.id.my_lists_recyclerview);
-        newListfab = view.findViewById(R.id.addNewListfab);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_list_item);
 
+        listID = getIntent().getStringExtra(MyListsFragment.LIST_ID);
+        listItems = new ArrayList<>();
+        itemKeys = new ArrayList<>();
 
-
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.HORIZONTAL));
-        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
-
+        listTitleTv = findViewById(R.id.ListTitleTV);
+        listItemsRecyclerView = findViewById(R.id.listItemRecyclerView);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(listItemsRecyclerView);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        myLists = new ArrayList<>();
-        uniqueIDs = new ArrayList<>();
+        listItemFAB = findViewById(R.id.addNewItemFab);
+
+        databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
+                            .child("MyLists").child(listID).child("ListItems");
 
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("MyLists");
+
+        listTitleTv.setText(getIntent().getStringExtra(MyListsFragment.LIST_TITLE));
+
+
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                myLists.clear();
+                listItems.clear();
+                itemKeys.clear();
                 for (DataSnapshot element: snapshot.getChildren()) {
-                    MyLists list = element.getValue(MyLists.class);
-                    Log.i("mylists", list.getListCategory() + list.getListName());
-                    uniqueIDs.add(element.getKey());
-                    myLists.add(list);
+                    MyListItem item = element.getValue(MyListItem.class);
+                    listItems.add(item);
+                    itemKeys.add(element.getKey());
+                    Log.i("listitemactivity", element.getKey());
                 }
-                Log.i("lists", uniqueIDs.get(0) + "");
-                Log.i("lists", myLists.get(0).getListName() + "");
 
-                MyListsAdapter myListsAdapter = new MyListsAdapter(myLists, getContext(), uniqueIDs, callbacks);
-                recyclerView.setAdapter(myListsAdapter);
-
+                MyListsItemsAdapter listsItemsAdapter = new MyListsItemsAdapter(ListItemActivity.this, listItems);
+                listsItemsAdapter.itemIDs = itemKeys;
+                listsItemsAdapter.listID = listID;
+                listItemsRecyclerView.setLayoutManager(new LinearLayoutManager(ListItemActivity.this));
+                listItemsRecyclerView.setAdapter(listsItemsAdapter);
 
             }
 
@@ -109,32 +105,39 @@ public class MyListsFragment extends Fragment implements MyListsAdapter.ListItem
             }
         });
 
-        newListfab.setOnClickListener(new View.OnClickListener() {
+        listItemFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-                View listDialog = LayoutInflater.from(getContext()).inflate(R.layout.new_list_alert_dialog, null);
-                EditText listTitle = listDialog.findViewById(R.id.listNameET);
-                EditText listCategory = listDialog.findViewById(R.id.listCategoryET);
 
-                builder.setPositiveButton("Add list", new DialogInterface.OnClickListener() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ListItemActivity.this);
+
+                View listDialog = LayoutInflater.from(ListItemActivity.this).inflate(R.layout.new_list_alert_dialog, null);
+                EditText itemTitle = listDialog.findViewById(R.id.listNameET);
+                EditText itemGenre = listDialog.findViewById(R.id.listCategoryET);
+
+                itemTitle.setHint("Enter item name");
+                itemGenre.setHint("Enter genre");
+
+                builder.setPositiveButton("Add item", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Map<String, Object> newListItem = new HashMap<>();
-                        newListItem.put("listCategory", listCategory.getText().toString());
-                        newListItem.put("listName", listTitle.getText().toString());
+                        newListItem.put("Genre", itemGenre.getText().toString());
+                        newListItem.put("Title", itemTitle.getText().toString());
+                        newListItem.put("Date", new Date().toString());
 
-                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
-                                .child("MyLists");
-                        databaseReference.push().setValue(newListItem);
-                        Toast.makeText(getContext(), listTitle.getText().toString() + listCategory.getText().toString(), Toast.LENGTH_SHORT).show();
+                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
+                                    .child("MyLists").child(listID).child("ListItems");
+                        reference.push().setValue(newListItem);
+
+                        Toast.makeText(ListItemActivity.this, itemTitle.getText().toString() + itemGenre.getText().toString(), Toast.LENGTH_SHORT).show();
 
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // User cancelled the dialog
-                        Toast.makeText(getContext(), "cancel clicked", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ListItemActivity.this, "cancel clicked", Toast.LENGTH_SHORT).show();
 
 
                     }
@@ -143,15 +146,9 @@ public class MyListsFragment extends Fragment implements MyListsAdapter.ListItem
                 builder.show();
 
 
-
-
-
             }
         });
 
-        Log.i("mylists", String.valueOf(myLists.size()));
-
-        return view;
     }
 
     ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -164,7 +161,7 @@ public class MyListsFragment extends Fragment implements MyListsAdapter.ListItem
         public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
             super.onChildDraw(c, recyclerView, viewHolder, dX,
                     dY, actionState, isCurrentlyActive);
-            icon = ContextCompat.getDrawable(getContext(),
+            icon = ContextCompat.getDrawable(ListItemActivity.this,
                     R.drawable.ic_list_trash);
             background = new ColorDrawable(Color.RED);
             View itemView = viewHolder.itemView;
@@ -205,19 +202,17 @@ public class MyListsFragment extends Fragment implements MyListsAdapter.ListItem
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
-                    .child("MyLists");
-            reference.child(uniqueIDs.get(viewHolder.getAdapterPosition())).removeValue();
+                    .child("MyLists").child(listID).child("ListItems");
+            reference.child(itemKeys.get(viewHolder.getAdapterPosition())).removeValue();
 
         }
     };
 
 
-    @Override
-    public void ListItemClicked(String listID, String listTitle) {
-        Intent i = new Intent(getContext(), ListItemActivity.class);
-        i.putExtra(LIST_ID, listID);
-        i.putExtra(LIST_TITLE, listTitle);
-        startActivity(i);
 
-    }
+
+
+
+
+
 }

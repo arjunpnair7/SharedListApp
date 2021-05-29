@@ -1,19 +1,27 @@
 package com.example.sharedlistapp.Adapter;
 
 import android.content.Context;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sharedlistapp.Model.MyListItem;
 import com.example.sharedlistapp.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapter.ListItemViewHolder> {
@@ -24,13 +32,15 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
 
     private Context context;
     private List<MyListItem> listItems;
-    private MyListsAdapter.ListItemCallbacks callbacks;
+    public List<String> itemIDs = new ArrayList<>();
+    public String listID = "";
 
-    public MyListsItemsAdapter(Context context, List<MyListItem> listItems, MyListsAdapter.ListItemCallbacks callbacks) {
+
+
+    public MyListsItemsAdapter(Context context, List<MyListItem> listItems) {
 
         this.context = context;
         this.listItems = listItems;
-        this.callbacks = callbacks;
 
     }
 
@@ -48,7 +58,8 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
         Log.i("Adapter", listItems.get(position).getTitle());
         holder.itemGenre.setText(listItems.get(position).getGenre());
         holder.itemTitle.setText(listItems.get(position).getTitle());
-        holder.itemDate.setText(listItems.get(position).getDate().toString());
+        //holder.itemDate.setText(listItems.get(position).getDate().toString());
+        holder.itemID = itemIDs.get(position);
 
     }
 
@@ -63,13 +74,17 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
         public TextView itemTitle;
         public TextView itemGenre;
         public TextView itemDate;
+        public String itemID = "";
+        public FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         public ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
 
             itemTitle = itemView.findViewById(R.id.listItemName);
             itemGenre = itemView.findViewById(R.id.listItemGenre);
-            itemDate = itemView.findViewById(R.id.listItemDate);
+            //itemDate = itemView.findViewById(R.id.listItemDate);
+
+
         }
     }
 }

@@ -71,7 +71,11 @@ public class MainActivity extends AppCompatActivity {
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
             public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                tab.setText("My List");
+                if (position == 0) {
+                    tab.setText("My Lists");
+                } else {
+                    tab.setText("Shared Lists");
+                }
             }
         });
 
