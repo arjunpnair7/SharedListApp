@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 if (position == 0) {
                     tab.setText("My Lists");
                 } else {
-                    tab.setText("Shared Lists");
+                    tab.setText("Friend List");
                 }
             }
         });
