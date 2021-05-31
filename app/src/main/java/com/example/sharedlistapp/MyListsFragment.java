@@ -88,14 +88,15 @@ public class MyListsFragment extends Fragment implements MyListsAdapter.ListItem
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 myLists.clear();
+                uniqueIDs.clear();
                 for (DataSnapshot element: snapshot.getChildren()) {
                     MyLists list = element.getValue(MyLists.class);
                     Log.i("mylists", list.getListCategory() + list.getListName());
                     uniqueIDs.add(element.getKey());
                     myLists.add(list);
                 }
-                Log.i("lists", uniqueIDs.get(0) + "");
-                Log.i("lists", myLists.get(0).getListName() + "");
+//                Log.i("lists", uniqueIDs.get(0) + "");
+                //Log.i("lists", myLists.get(0).getListName() + "");
 
                 MyListsAdapter myListsAdapter = new MyListsAdapter(myLists, getContext(), uniqueIDs, callbacks);
                 recyclerView.setAdapter(myListsAdapter);
