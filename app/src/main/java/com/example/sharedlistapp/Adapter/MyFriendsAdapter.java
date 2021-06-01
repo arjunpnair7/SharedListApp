@@ -45,7 +45,7 @@ public class MyFriendsAdapter extends RecyclerView.Adapter<MyFriendsAdapter.MyFr
         private TextView friendUserNameTV;
         public MyFriendViewHolder(@NonNull View itemView) {
             super(itemView);
-            friendUserNameTV = itemView.findViewById(R.id.friendUsernameTV);
+            friendUserNameTV = itemView.findViewById(R.id.friendRequestTV);
         }
     }
 

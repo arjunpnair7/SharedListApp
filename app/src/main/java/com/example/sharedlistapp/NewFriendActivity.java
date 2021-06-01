@@ -21,14 +21,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class NewFriendActivity extends AppCompatActivity {
+public class NewFriendActivity extends AppCompatActivity implements AddFriendsAdapter.FriendRequestCallback {
     private SearchView friendSearchView;
     private List<MyFriend> friendRequests;
     private RecyclerView addFriendsRecyclerView;
     private FirebaseUser firebaseUser;
     private AddFriendsAdapter addFriendsAdapter;
+    private String receiverKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +46,7 @@ public class NewFriendActivity extends AppCompatActivity {
         friendSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.i("search", query);
+               // Log.i("search", query);
                 friendRequests.clear();
                 databaseRef.addValueEventListener(new ValueEventListener() {
                     @Override
@@ -51,13 +54,15 @@ public class NewFriendActivity extends AppCompatActivity {
                         for (DataSnapshot element: snapshot.getChildren()) {
                             MyFriend myFriend = element.getValue(MyFriend.class);
                             if (query.equals(myFriend.getUsername())) {
+                                Log.i("key", element.getKey());
+                                receiverKey = element.getKey();
                                 friendRequests.add(myFriend);
                             } else {
                                 Toast.makeText(NewFriendActivity.this, "No matching user", Toast.LENGTH_SHORT).show();
 
                             }
                         }
-                        addFriendsAdapter = new AddFriendsAdapter(NewFriendActivity.this, friendRequests);
+                        addFriendsAdapter = new AddFriendsAdapter(NewFriendActivity.this, friendRequests, NewFriendActivity.this);
                         addFriendsRecyclerView.setAdapter(addFriendsAdapter);
                     }
 
@@ -77,7 +82,7 @@ public class NewFriendActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 friendRequests.clear();
-                addFriendsRecyclerView.setAdapter(new AddFriendsAdapter(NewFriendActivity.this, friendRequests));
+                addFriendsRecyclerView.setAdapter(new AddFriendsAdapter(NewFriendActivity.this, friendRequests, NewFriendActivity.this));
                 return true;
             }
         });
@@ -85,4 +90,51 @@ public class NewFriendActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    public void sendFriendRequest(String receiverUsername, String userName) {
+        userName = userName.substring(0, userName.indexOf("@"));
+        String formattedReceiverUserName = receiverUsername.substring(0, receiverUsername.indexOf("@"));
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("OutgoingRequests");
+        String finalUserName = userName;
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot element: snapshot.getChildren()) {
+                    MyFriend myFriend = element.getValue(MyFriend.class);
+                    if (myFriend.getUsername().equals(finalUserName)) {
+                        Toast.makeText(NewFriendActivity.this, "Request already sent!", Toast.LENGTH_SHORT).show();
+
+                        return;
+                    }
+                }
+                friendRequests.clear();
+                DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(receiverKey).child("FriendRequests");
+                Map<String, Object> newFriendRequest = new HashMap<>();
+                newFriendRequest.put("username", receiverUsername);
+                databaseRef.child(formattedReceiverUserName + "Requests").setValue(newFriendRequest);
+                Toast.makeText(NewFriendActivity.this, "Friend Request sent!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    @Override
+    public void addToOutgoingRequests(String senderUID, String receiverUsername) {
+        String formattedUsername = receiverUsername.substring(0, receiverUsername.indexOf("@"));
+        Map<String, Object> outgoingRequest = new HashMap<>();
+        outgoingRequest.put("username", formattedUsername);
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(senderUID).child("OutgoingRequests").child(formattedUsername);
+        databaseRef.setValue(outgoingRequest);
+
+    }
+
+
+
+
 }
