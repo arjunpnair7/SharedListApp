@@ -1,6 +1,7 @@
 package com.example.sharedlistapp.Adapter;
 
 import android.content.Context;
+import android.media.JetPlayer;
 import android.provider.ContactsContract;
 import android.text.Layout;
 import android.util.Log;
@@ -27,7 +28,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdapter.FriendRequestViewHolder> {
 
@@ -65,7 +68,6 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         private Button declineButton;
         private String key;
         private String receiverEmail;
-        private String formattedUsername;
         private ValueEventListener listener;
         private ValueEventListener listener2;
 
@@ -121,13 +123,21 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
                                     String baseString = firebaseUser.getEmail();
                                     baseString = baseString.substring(0, baseString.indexOf("@"));
                                     databaseRef.child(key).child("OutgoingRequests").child(baseString).removeValue();
-                                    databaseRef.child(key).child("OutgoingRequests").child(baseString).removeValue();
                                     databaseRef.removeEventListener(listener2);
                                 } else {
                                     Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
                                 }
                             }
+                            Map<String, Object> friendUpdate = new HashMap<>();
+                            friendUpdate.put("username", receiverEmail);
+                            Map<String, Object> friendUpdate2 = new HashMap<>();
+                            friendUpdate2.put("username", firebaseUser.getEmail());
 
+                        DatabaseReference friendReference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
+                                                            .child("MyFriends");
+                        friendReference.push().setValue(friendUpdate);
+                        DatabaseReference friendReference2 = FirebaseDatabase.getInstance().getReference("Users").child(key).child("MyFriends");
+                        friendReference2.push().setValue(friendUpdate2);
                         }
 
                         @Override

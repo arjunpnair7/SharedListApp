@@ -33,6 +33,7 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
     private AddFriendsAdapter addFriendsAdapter;
     private String receiverKey;
     private ValueEventListener listener;
+    private ValueEventListener listener2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +56,16 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
                         for (DataSnapshot element: snapshot.getChildren()) {
                             MyFriend myFriend = element.getValue(MyFriend.class);
                             if (query.equals(myFriend.getUsername())) {
+                                friendRequests.clear();
                                 receiverKey = element.getKey();
                                 friendRequests.add(myFriend);
                             } else {
-                                //Toast.makeText(NewFriendActivity.this, "No matching user", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(NewFriendActivity.this, "No matching user", Toast.LENGTH_SHORT).show();
 
                             }
                         }
                         addFriendsAdapter = new AddFriendsAdapter(NewFriendActivity.this, friendRequests, NewFriendActivity.this);
+                        Log.i("testt", friendRequests.size() + "");
                         addFriendsRecyclerView.setAdapter(addFriendsAdapter);
                     }
 
