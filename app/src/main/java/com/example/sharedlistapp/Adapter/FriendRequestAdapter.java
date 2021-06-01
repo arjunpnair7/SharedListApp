@@ -1,7 +1,9 @@
 package com.example.sharedlistapp.Adapter;
 
 import android.content.Context;
+import android.provider.ContactsContract;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +12,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sharedlistapp.Model.MyFriend;
+import com.example.sharedlistapp.NewFriendActivity;
 import com.example.sharedlistapp.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -21,10 +33,12 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
 
     private Context context;
     private List<MyFriend> myFriendList;
+    private FirebaseUser firebaseUser;
 
     public FriendRequestAdapter(Context context, List<MyFriend> myFriendList) {
         this.context = context;
         this.myFriendList = myFriendList;
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     }
 
 
@@ -49,6 +63,13 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         private TextView usernameTV;
         private Button addButton;
         private Button declineButton;
+        private String key;
+        private String receiverEmail;
+        private String formattedUsername;
+        private ValueEventListener listener;
+        private ValueEventListener listener2;
+
+
 
         public FriendRequestViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -56,12 +77,72 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             addButton = itemView.findViewById(R.id.addButton);
             declineButton = itemView.findViewById(R.id.declineButton);
 
+
             addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "Add button clicked", Toast.LENGTH_SHORT).show();
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("FriendRequests");
+
+                    reference.addValueEventListener(listener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            String formattedUsername = "";
+                            for (DataSnapshot element: snapshot.getChildren()) {
+                                MyFriend myFriend = element.getValue(MyFriend.class);
+                                if (myFriend.getUsername().equals(usernameTV.getText().toString())) {
+                                    receiverEmail = usernameTV.getText().toString();
+                                     formattedUsername = usernameTV.getText().toString().substring(0, usernameTV.getText().toString().indexOf("@"));
+                                    formattedUsername = formattedUsername + "Requests";
+                                    reference.child(formattedUsername).removeValue();
+                                    reference.removeEventListener(listener);
+
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+
+
+
+                    DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("Users");
+                    databaseRef.addListenerForSingleValueEvent(listener2 = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot element: snapshot.getChildren()) {
+                                MyFriend myFriend = element.getValue(MyFriend.class);
+                                if (receiverEmail.equals(myFriend.getUsername())) {
+                                    key = element.getKey();
+                                    String baseString = firebaseUser.getEmail();
+                                    baseString = baseString.substring(0, baseString.indexOf("@"));
+                                    databaseRef.child(key).child("OutgoingRequests").child(baseString).removeValue();
+                                    databaseRef.child(key).child("OutgoingRequests").child(baseString).removeValue();
+                                    databaseRef.removeEventListener(listener2);
+                                } else {
+                                    Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+
                 }
+
+
+                
             });
+
             declineButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

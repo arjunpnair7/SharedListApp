@@ -24,9 +24,7 @@ public class AddFriendsAdapter extends RecyclerView.Adapter<AddFriendsAdapter.Ad
         public void addToOutgoingRequests(String senderUID, String receiverUsername);
     }
 
-    public static void disablefab(com.google.android.material.floatingactionbutton.FloatingActionButton fab) {
-        fab.setEnabled(false);
-    }
+
 
 
     private FirebaseUser fUser;
@@ -52,7 +50,6 @@ public class AddFriendsAdapter extends RecyclerView.Adapter<AddFriendsAdapter.Ad
     @Override
     public void onBindViewHolder(@NonNull AddFriendsViewHolder holder, int position) {
         holder.friendUsernameTV.setText(friendRequests.get(position).getUsername());
-        //disablefab(holder.newFriendFab);
         Log.i("test", friendRequests.get(position) + "");
     }
 

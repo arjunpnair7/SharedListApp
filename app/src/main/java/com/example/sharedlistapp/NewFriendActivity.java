@@ -32,6 +32,7 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
     private FirebaseUser firebaseUser;
     private AddFriendsAdapter addFriendsAdapter;
     private String receiverKey;
+    private ValueEventListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +55,10 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
                         for (DataSnapshot element: snapshot.getChildren()) {
                             MyFriend myFriend = element.getValue(MyFriend.class);
                             if (query.equals(myFriend.getUsername())) {
-                                Log.i("key", element.getKey());
                                 receiverKey = element.getKey();
                                 friendRequests.add(myFriend);
                             } else {
-                                Toast.makeText(NewFriendActivity.this, "No matching user", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(NewFriendActivity.this, "No matching user", Toast.LENGTH_SHORT).show();
 
                             }
                         }
@@ -81,8 +81,8 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                friendRequests.clear();
-                addFriendsRecyclerView.setAdapter(new AddFriendsAdapter(NewFriendActivity.this, friendRequests, NewFriendActivity.this));
+                //friendRequests.clear();
+                //addFriendsRecyclerView.setAdapter(new AddFriendsAdapter(NewFriendActivity.this, friendRequests, NewFriendActivity.this));
                 return true;
             }
         });
@@ -97,22 +97,23 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
         String formattedReceiverUserName = receiverUsername.substring(0, receiverUsername.indexOf("@"));
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("OutgoingRequests");
         String finalUserName = userName;
-        reference.addValueEventListener(new ValueEventListener() {
+        friendRequests.clear();
+        reference.addValueEventListener(listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot element: snapshot.getChildren()) {
                     MyFriend myFriend = element.getValue(MyFriend.class);
                     if (myFriend.getUsername().equals(finalUserName)) {
                         Toast.makeText(NewFriendActivity.this, "Request already sent!", Toast.LENGTH_SHORT).show();
-
                         return;
                     }
                 }
-                friendRequests.clear();
+
                 DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("Users").child(receiverKey).child("FriendRequests");
                 Map<String, Object> newFriendRequest = new HashMap<>();
                 newFriendRequest.put("username", receiverUsername);
                 databaseRef.child(formattedReceiverUserName + "Requests").setValue(newFriendRequest);
+                reference.removeEventListener(listener);
                 Toast.makeText(NewFriendActivity.this, "Friend Request sent!", Toast.LENGTH_SHORT).show();
             }
 
