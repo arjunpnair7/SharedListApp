@@ -1,7 +1,6 @@
 package com.example.sharedlistapp;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -9,14 +8,12 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +23,6 @@ import android.widget.Toast;
 
 import com.example.sharedlistapp.Adapter.MyListsItemsAdapter;
 import com.example.sharedlistapp.Model.MyListItem;
-import com.example.sharedlistapp.Model.MyLists;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,8 +36,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ListItemActivity extends AppCompatActivity {
 
@@ -65,11 +59,11 @@ public class ListItemActivity extends AppCompatActivity {
         listItems = new ArrayList<>();
         itemKeys = new ArrayList<>();
 
-        listTitleTv = findViewById(R.id.ListTitleTV);
-        listItemsRecyclerView = findViewById(R.id.listItemRecyclerView);
+        listTitleTv = findViewById(R.id.SharedListTitleTV);
+        listItemsRecyclerView = findViewById(R.id.sharedListItemRecyclerView);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(listItemsRecyclerView);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        listItemFAB = findViewById(R.id.addNewItemFab);
+        listItemFAB = findViewById(R.id.sharedAddNewItemFab);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
                             .child("MyLists").child(listID).child("ListItems");

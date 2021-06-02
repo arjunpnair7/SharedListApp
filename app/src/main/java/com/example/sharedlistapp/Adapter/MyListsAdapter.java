@@ -18,7 +18,7 @@ import java.util.List;
 public class MyListsAdapter extends RecyclerView.Adapter<MyListsAdapter.ListViewHolder> {
 
     public interface ListItemCallbacks {
-        public void ListItemClicked(String listID, String listTitle);
+         void ListItemClicked(String listID, String listTitle);
     }
 
     private List<MyLists> userLists;

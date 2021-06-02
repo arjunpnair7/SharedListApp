@@ -20,6 +20,7 @@ import com.example.sharedlistapp.R;
 import java.util.List;
 
 public class ChooseFriendsAdapter extends RecyclerView.Adapter<ChooseFriendsAdapter.ChooseFriendsViewHolder> {
+
     private List<MyFriend> friendList;
     private List<Boolean> friendCheckedList;
     private Context context;

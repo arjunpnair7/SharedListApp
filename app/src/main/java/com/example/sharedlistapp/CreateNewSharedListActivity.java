@@ -41,12 +41,14 @@ public class CreateNewSharedListActivity extends AppCompatActivity {
     private List<Boolean> friendCheckedList;
     private ChooseFriendsAdapter chooseFriendsAdapter;
     private Button createSharedListButton;
+    private FirebaseUser firebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_shared_list);
 
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         createSharedListButton = findViewById(R.id.createSharedListButton);
         chooseFriendsRecyclerView = findViewById(R.id.chooseFriendsRecyclerView);
         chooseFriendsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -78,6 +80,9 @@ public class CreateNewSharedListActivity extends AppCompatActivity {
                             userInfo.put("username", finalList.get(i).getUsername());
                             reference.push().setValue(userInfo);
                         }
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("username", firebaseUser.getEmail());
+                        reference.push().setValue(user);
                         reference = FirebaseDatabase.getInstance().getReference("SharedLists").child(listTitle.getText().toString());
                         reference.child("ListDetails").setValue(newListItem);
                         startActivity(new Intent(CreateNewSharedListActivity.this, MainActivity.class));
