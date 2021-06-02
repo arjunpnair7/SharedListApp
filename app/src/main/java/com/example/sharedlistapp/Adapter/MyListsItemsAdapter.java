@@ -5,21 +5,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sharedlistapp.Model.MyListItem;
 import com.example.sharedlistapp.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +74,7 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
         public ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            itemTitle = itemView.findViewById(R.id.listItemName);
+            itemTitle = itemView.findViewById(R.id.chooseFriendEmailTV);
             itemGenre = itemView.findViewById(R.id.listItemGenre);
             //itemDate = itemView.findViewById(R.id.listItemDate);
 

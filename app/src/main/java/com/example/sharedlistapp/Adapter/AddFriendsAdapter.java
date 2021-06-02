@@ -20,8 +20,8 @@ import java.util.List;
 public class AddFriendsAdapter extends RecyclerView.Adapter<AddFriendsAdapter.AddFriendsViewHolder> {
 
     public interface FriendRequestCallback {
-        public void sendFriendRequest(String receiverUsername, String userName);
-        public void addToOutgoingRequests(String senderUID, String receiverUsername);
+         void sendFriendRequest(String receiverUsername, String userName);
+         void addToOutgoingRequests(String senderUID, String receiverUsername);
     }
 
 

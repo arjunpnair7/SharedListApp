@@ -8,7 +8,7 @@
     tools:context=".MyListsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/friend_list_recyclerView"
+        android:id="@+id/shared_list_recyclerView"
         android:layout_width="394dp"
         android:layout_height="337dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -16,7 +16,7 @@
         app:layout_constraintTop_toBottomOf="@+id/currentFriendsTV"></androidx.recyclerview.widget.RecyclerView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addNewFriendfab"
+        android:id="@+id/addNewSharedListfab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -50,7 +50,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/friend_list_recyclerView" />
+        app:layout_constraintTop_toBottomOf="@+id/shared_list_recyclerView" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/pendingRequestsRecyclerView"

@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,8 +52,8 @@ public class FriendListFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
-        newFriendFab = view.findViewById(R.id.addNewFriendfab);
-        friendListRecyclerView = view.findViewById(R.id.friend_list_recyclerView);
+        newFriendFab = view.findViewById(R.id.addNewSharedListfab);
+        friendListRecyclerView = view.findViewById(R.id.shared_list_recyclerView);
         friendRequestRecyclerView = view.findViewById(R.id.pendingRequestsRecyclerView);
         friendRequestRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         friendListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -173,7 +171,6 @@ public class FriendListFragment extends Fragment {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     for (DataSnapshot element: snapshot.getChildren()) {
                         MyFriend myFriend = element.getValue(MyFriend.class);
-                      //  Log.i("tester", myFriend.getUsername() + ":" + viewHolder.getAdapterPosition();
                         if (myFriend.getUsername().equals(myFriendList.get(viewHolder.getAdapterPosition()).getUsername())) {
                             String key = element.getKey();
                             reference.child(key).removeValue();

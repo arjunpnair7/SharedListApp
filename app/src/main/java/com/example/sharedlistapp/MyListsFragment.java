@@ -61,8 +61,8 @@ public class MyListsFragment extends Fragment implements MyListsAdapter.ListItem
         callbacks = this;
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_my_lists, container, false);
-        recyclerView = view.findViewById(R.id.friend_list_recyclerView);
-        newListfab = view.findViewById(R.id.addNewFriendfab);
+        recyclerView = view.findViewById(R.id.shared_list_recyclerView);
+        newListfab = view.findViewById(R.id.addNewSharedListfab);
 
 
 

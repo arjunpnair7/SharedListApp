@@ -59,7 +59,7 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
                                 receiverKey = element.getKey();
                                 friendRequests.add(myFriend);
                             } else {
-                                Toast.makeText(NewFriendActivity.this, "No matching user", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(NewFriendActivity.this, "No matching user", Toast.LENGTH_SHORT).show();
 
                             }
                         }
