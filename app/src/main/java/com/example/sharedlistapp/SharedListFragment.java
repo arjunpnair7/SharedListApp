@@ -38,6 +38,9 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
     private List<MyLists> userSharedLists;
     private SharedListsAdapter.SharedListsCallbacks callbacks;
     public static final String SHARED_TITLE = "sharedTitle";
+    public static final String SHARED_LISTS = "sharedLists";
+    public static final String SHARED_CATEGORY = "sharedCategory";
+
 
 
 
@@ -58,7 +61,16 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
         sharedListFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getContext(), CreateNewSharedListActivity.class));
+                Intent intent = new Intent(getContext(), CreateNewSharedListActivity.class);
+                String[] listTitles = new String[userSharedLists.size()];
+                String[] listCategories = new String[userSharedLists.size()];
+                for (int i = 0; i < userSharedLists.size(); i++) {
+                    listTitles[i] = userSharedLists.get(i).getListName();
+                    listCategories[i] = userSharedLists.get(i).getListCategory();
+                }
+                intent.putExtra(SHARED_LISTS, listTitles);
+                intent.putExtra(SHARED_CATEGORY, listCategories);
+                startActivity(intent);
             }
         });
 
@@ -67,6 +79,7 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                userSharedLists.clear();
                 for (DataSnapshot element: snapshot.getChildren()) {
                     String key = element.getKey();
                     checkIfUserIsPartOfList(firebaseUser.getEmail(), key);
@@ -87,13 +100,18 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
 
     public void checkIfUserIsPartOfList(String userEmail, String listKey) {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("SharedLists").child(listKey).child("Users");
+        userSharedLists.clear();
         reference.addValueEventListener(listener1 = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    userSharedLists.clear();
                     MyFriend myFriend = dataSnapshot.getValue(MyFriend.class);
+                    userSharedLists.clear();
+
                     if (myFriend.getUsername().equals(userEmail)) {
                         DatabaseReference listReference = FirebaseDatabase.getInstance().getReference().child("SharedLists").child(listKey).child("ListDetails");
+                        userSharedLists.clear();
                         listReference.addValueEventListener(listener2 = new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {

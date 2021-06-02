@@ -191,8 +191,8 @@ public class SharedListItemActivity extends AppCompatActivity {
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
-                    .child("MyLists").child(listID).child("ListItems");
+           // DatabaseReference reference = FirebaseDatabase.getInstance().getReference("SharedLists").child(f)
+                //    .child("MyLists").child(listID).child("ListItems");
 
         }
     };

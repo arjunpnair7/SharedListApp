@@ -17,8 +17,7 @@ import android.widget.Toast;
 
 import com.example.sharedlistapp.Adapter.ChooseFriendsAdapter;
 import com.example.sharedlistapp.Model.MyFriend;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -42,6 +41,8 @@ public class CreateNewSharedListActivity extends AppCompatActivity {
     private ChooseFriendsAdapter chooseFriendsAdapter;
     private Button createSharedListButton;
     private FirebaseUser firebaseUser;
+    private String[] listTitles;
+    private String[] listCategories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,8 @@ public class CreateNewSharedListActivity extends AppCompatActivity {
         createSharedListButton = findViewById(R.id.createSharedListButton);
         chooseFriendsRecyclerView = findViewById(R.id.chooseFriendsRecyclerView);
         chooseFriendsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        listTitles = getIntent().getStringArrayExtra(SharedListFragment.SHARED_LISTS);
+        listCategories = getIntent().getStringArrayExtra(SharedListFragment.SHARED_CATEGORY);
         friendList = new ArrayList<>();
 
         fUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -68,6 +71,15 @@ public class CreateNewSharedListActivity extends AppCompatActivity {
 
                 builder.setPositiveButton("Add list", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+
+                        for (int i = 0; i < listCategories.length; i++) {
+                            if (listCategory.getText().toString().equals(listCategories[i]) && listTitle.getText().toString().equals(listTitles[i])) {
+                                Toast.makeText(CreateNewSharedListActivity.this, "Please create a unique list", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                        }
+
+
                         Map<String, Object> newListItem = new HashMap<>();
                         newListItem.put("listCategory", listCategory.getText().toString());
                         newListItem.put("listName", listTitle.getText().toString());
