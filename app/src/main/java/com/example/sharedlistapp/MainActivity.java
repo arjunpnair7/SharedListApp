@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
         pagerAdapter.addFragments(new MyListsFragment());
         pagerAdapter.addFragments(new FriendListFragment());
+        pagerAdapter.addFragments(new SharedListFragment());
 
 
         viewPager.setAdapter(pagerAdapter);
@@ -73,8 +74,10 @@ public class MainActivity extends AppCompatActivity {
             public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
                 if (position == 0) {
                     tab.setText("My Lists");
-                } else {
+                } else if (position == 1) {
                     tab.setText("Friend List");
+                } else {
+                    tab.setText("Shared Lists");
                 }
             }
         });

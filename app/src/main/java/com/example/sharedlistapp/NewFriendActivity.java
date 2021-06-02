@@ -48,7 +48,6 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
         friendSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-               // Log.i("search", query);
                 friendRequests.clear();
                 databaseRef.addValueEventListener(new ValueEventListener() {
                     @Override
@@ -65,7 +64,6 @@ public class NewFriendActivity extends AppCompatActivity implements AddFriendsAd
                             }
                         }
                         addFriendsAdapter = new AddFriendsAdapter(NewFriendActivity.this, friendRequests, NewFriendActivity.this);
-                        Log.i("testt", friendRequests.size() + "");
                         addFriendsRecyclerView.setAdapter(addFriendsAdapter);
                     }
 

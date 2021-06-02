@@ -79,6 +79,37 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
             addButton = itemView.findViewById(R.id.addButton);
             declineButton = itemView.findViewById(R.id.declineButton);
 
+            declineButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("FriendRequests");
+
+                    reference.addValueEventListener(listener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            String formattedUsername = "";
+                            for (DataSnapshot element: snapshot.getChildren()) {
+                                MyFriend myFriend = element.getValue(MyFriend.class);
+                                if (myFriend.getUsername().equals(usernameTV.getText().toString())) {
+                                    receiverEmail = usernameTV.getText().toString();
+                                    formattedUsername = usernameTV.getText().toString().substring(0, usernameTV.getText().toString().indexOf("@"));
+                                    formattedUsername = formattedUsername + "Requests";
+                                    reference.child(formattedUsername).removeValue();
+                                    reference.removeEventListener(listener);
+
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+
 
             addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -153,12 +184,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
                 
             });
 
-            declineButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(context, "Decline button clicked", Toast.LENGTH_SHORT).show();
-                }
-            });
+           
         }
     }
 }

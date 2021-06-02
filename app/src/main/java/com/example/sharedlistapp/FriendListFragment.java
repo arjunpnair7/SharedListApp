@@ -1,13 +1,21 @@
 package com.example.sharedlistapp;
 
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +42,7 @@ public class FriendListFragment extends Fragment {
     private List<MyFriend> myFriendList;
     private List<MyFriend> pendingFriendRequestList;
     private FirebaseUser firebaseUser;
+    private ValueEventListener listener;
     private com.google.android.material.floatingactionbutton.FloatingActionButton newFriendFab;
 
 
@@ -50,6 +59,7 @@ public class FriendListFragment extends Fragment {
         friendRequestRecyclerView = view.findViewById(R.id.pendingRequestsRecyclerView);
         friendRequestRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         friendListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(friendListRecyclerView);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         myFriendList = new ArrayList<>();
         pendingFriendRequestList = new ArrayList<>();
@@ -106,4 +116,78 @@ public class FriendListFragment extends Fragment {
         return view;
 
     }
+
+    ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+
+        private Drawable icon;
+        private ColorDrawable background;
+
+
+        @Override
+        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            super.onChildDraw(c, recyclerView, viewHolder, dX,
+                    dY, actionState, isCurrentlyActive);
+            icon = ContextCompat.getDrawable(getContext(),
+                    R.drawable.ic_list_trash);
+            background = new ColorDrawable(Color.RED);
+            View itemView = viewHolder.itemView;
+            int backgroundCornerOffset = 20;
+            int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconBottom = iconTop + icon.getIntrinsicHeight();
+
+            if (dX > 0) { // Swiping to the right
+                int iconLeft = itemView.getLeft() + iconMargin + icon.getIntrinsicWidth();
+                int iconRight = itemView.getLeft() + iconMargin + 50;
+                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+
+                background.setBounds(itemView.getLeft(), itemView.getTop(),
+                        itemView.getLeft() + ((int) dX) + backgroundCornerOffset,
+                        itemView.getBottom());
+            } else if (dX < 0) { // Swiping to the left
+                int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
+                int iconRight = itemView.getRight() - iconMargin;
+                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+
+                background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset,
+                        itemView.getTop(), itemView.getRight(), itemView.getBottom());
+            } else { // view is unSwiped
+                background.setBounds(0, 0, 0, 0);
+            }
+
+
+            background.draw(c);
+            icon.draw(c);
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("MyFriends");
+            reference.addValueEventListener(listener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot element: snapshot.getChildren()) {
+                        MyFriend myFriend = element.getValue(MyFriend.class);
+                      //  Log.i("tester", myFriend.getUsername() + ":" + viewHolder.getAdapterPosition();
+                        if (myFriend.getUsername().equals(myFriendList.get(viewHolder.getAdapterPosition()).getUsername())) {
+                            String key = element.getKey();
+                            reference.child(key).removeValue();
+                            reference.removeEventListener(listener);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }
+    };
 }
