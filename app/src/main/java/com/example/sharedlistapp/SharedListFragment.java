@@ -36,6 +36,8 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
     private ValueEventListener listener2;
     private FirebaseUser firebaseUser;
     private List<MyLists> userSharedLists;
+    private SharedListsAdapter.SharedListsCallbacks callbacks;
+    public static final String SHARED_TITLE = "sharedTitle";
 
 
 
@@ -44,6 +46,7 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_shared_list, container, false);
+        callbacks = this;
 
         userSharedLists = new ArrayList<>();
 
@@ -77,8 +80,8 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
         });
 
 
-        SharedListsAdapter sharedListsAdapter = new SharedListsAdapter(getContext(), userSharedLists);
-        sharedListRecyclerView.setAdapter(sharedListsAdapter);
+       // SharedListsAdapter sharedListsAdapter = new SharedListsAdapter(getContext(), userSharedLists, this);
+        //sharedListRecyclerView.setAdapter(sharedListsAdapter);
         return view;
     }
 
@@ -98,7 +101,7 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
                                 Log.i("toaster", myLists.getListName());
                                 userSharedLists.add(myLists);
                                 Log.i("toastersize", userSharedLists.size() + "");
-                                SharedListsAdapter sharedListsAdapter = new SharedListsAdapter(getContext(), userSharedLists);
+                                SharedListsAdapter sharedListsAdapter = new SharedListsAdapter(getContext(), userSharedLists, callbacks);
                                 sharedListRecyclerView.setAdapter(sharedListsAdapter);
 
                             }
@@ -120,7 +123,9 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
     }
 
     @Override
-    public void sharedListItemClicked(String sharedListId, String sharedListTitle) {
-
+    public void sharedListItemClicked(String sharedListTitle) {
+        Intent i = new Intent(getContext(), SharedListItemActivity.class);
+        i.putExtra(SHARED_TITLE, sharedListTitle);
+        startActivity(i);
     }
 }

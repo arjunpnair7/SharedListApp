@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,16 +18,18 @@ import java.util.List;
 public class SharedListsAdapter extends RecyclerView.Adapter<SharedListsAdapter.SharedListItemsViewHolder> {
 
     public interface SharedListsCallbacks {
-         void sharedListItemClicked(String sharedListId, String sharedListTitle);
+         void sharedListItemClicked(String sharedListTitle);
     }
 
 
     private Context context;
     private List<MyLists> userLists;
+    private SharedListsCallbacks callbacks;
 
-    public SharedListsAdapter(Context context, List<MyLists> userLists) {
+    public SharedListsAdapter(Context context, List<MyLists> userLists, SharedListsCallbacks callbacks) {
         this.context = context;
         this.userLists = userLists;
+        this.callbacks = callbacks;
     }
 
     @NonNull
@@ -58,6 +61,14 @@ public class SharedListsAdapter extends RecyclerView.Adapter<SharedListsAdapter.
             super(itemView);
             listTitle = itemView.findViewById(R.id.listTitle);
             listCategory = itemView.findViewById(R.id.listCategory);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callbacks.sharedListItemClicked(listTitle.getText().toString());
+                    Toast.makeText(context, listTitle.getText().toString(), Toast.LENGTH_SHORT).show();
+                }
+            });
 
         }
     }

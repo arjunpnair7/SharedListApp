@@ -52,8 +52,6 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
         Log.i("Adapter", listItems.get(position).getTitle());
         holder.itemGenre.setText(listItems.get(position).getGenre());
         holder.itemTitle.setText(listItems.get(position).getTitle());
-        //holder.itemDate.setText(listItems.get(position).getDate().toString());
-        holder.itemID = itemIDs.get(position);
 
     }
 
@@ -67,8 +65,7 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
     public class ListItemViewHolder extends RecyclerView.ViewHolder {
         public TextView itemTitle;
         public TextView itemGenre;
-        public TextView itemDate;
-        public String itemID = "";
+
         public FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         public ListItemViewHolder(@NonNull View itemView) {
@@ -76,7 +73,6 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
 
             itemTitle = itemView.findViewById(R.id.chooseFriendEmailTV);
             itemGenre = itemView.findViewById(R.id.listItemGenre);
-            //itemDate = itemView.findViewById(R.id.listItemDate);
 
 
         }
