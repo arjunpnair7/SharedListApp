@@ -45,6 +45,7 @@ public class SharedListItemActivity extends AppCompatActivity {
     private FirebaseUser firebaseUser;
     private String listID;
     private List<MyListItem> listItems;
+    private List<String> listItemKeys;
     private com.google.android.material.floatingactionbutton.FloatingActionButton listItemFAB;
 
 
@@ -56,6 +57,7 @@ public class SharedListItemActivity extends AppCompatActivity {
 
         listID = getIntent().getStringExtra(SharedListFragment.SHARED_TITLE);
         listItems = new ArrayList<>();
+        listItemKeys = new ArrayList<>();
 
         listTitleTv = findViewById(R.id.SharedListTitleTV);
         sharedListItemsRecyclerView = findViewById(R.id.sharedListItemRecyclerView);
@@ -76,9 +78,11 @@ public class SharedListItemActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 listItems.clear();
+                listItemKeys.clear();
                 for (DataSnapshot element: snapshot.getChildren()) {
                     MyListItem item = element.getValue(MyListItem.class);
                     listItems.add(item);
+                    listItemKeys.add(element.getKey());
                     Log.i("listitemactivity", element.getKey());
                 }
 
@@ -191,8 +195,11 @@ public class SharedListItemActivity extends AppCompatActivity {
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-           // DatabaseReference reference = FirebaseDatabase.getInstance().getReference("SharedLists").child(f)
-                //    .child("MyLists").child(listID).child("ListItems");
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("SharedLists")
+                    .child(listTitleTv.getText().toString()).child("ListDetails").child("ListItems")
+                    .child(listItemKeys.get(viewHolder.getAdapterPosition()));
+            reference.removeValue();
+
 
         }
     };

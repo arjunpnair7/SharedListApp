@@ -28,4 +28,5 @@ public class MyLists {
     public void setListCategory(String listCategory) {
         this.listCategory = listCategory;
     }
+    
 }

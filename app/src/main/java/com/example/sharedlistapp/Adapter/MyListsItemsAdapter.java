@@ -5,6 +5,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,9 +16,14 @@ import com.example.sharedlistapp.Model.MyListItem;
 import com.example.sharedlistapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapter.ListItemViewHolder> {
 
@@ -52,9 +59,16 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
         Log.i("Adapter", listItems.get(position).getTitle());
         holder.itemGenre.setText(listItems.get(position).getGenre());
         holder.itemTitle.setText(listItems.get(position).getTitle());
+        if (listItems.get(position).getCompleted() != null) {
+            if (listItems.get(position).getCompleted().equals("False")) {
+                holder.itemCheckbox.setChecked(false);
+            } else {
+                holder.itemCheckbox.setChecked(true);
+            }
+        }
+
 
     }
-
 
 
     @Override
@@ -65,6 +79,7 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
     public class ListItemViewHolder extends RecyclerView.ViewHolder {
         public TextView itemTitle;
         public TextView itemGenre;
+        private CheckBox itemCheckbox;
 
         public FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -73,6 +88,25 @@ public class MyListsItemsAdapter extends RecyclerView.Adapter<MyListsItemsAdapte
 
             itemTitle = itemView.findViewById(R.id.chooseFriendEmailTV);
             itemGenre = itemView.findViewById(R.id.listItemGenre);
+            itemCheckbox = itemView.findViewById(R.id.chooseFriendBox);
+
+            itemCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Map<String, Object> updateInfo = new HashMap<>();
+                    updateInfo.put("Genre", itemGenre.getText().toString());
+                    updateInfo.put("Title", itemTitle.getText().toString());
+                    updateInfo.put("Date", new Date().toString());
+                    if (isChecked) {
+                        updateInfo.put("Completed", "True");
+                    } else {
+                        updateInfo.put("Completed", "False");
+                    }
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("MyLists")
+                                                                                .child(listID).child("ListItems").child(itemIDs.get(getAdapterPosition()));
+                    reference.updateChildren(updateInfo);
+                }
+            });
 
 
         }

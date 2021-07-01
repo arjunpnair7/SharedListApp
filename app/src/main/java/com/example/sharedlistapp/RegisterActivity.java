@@ -84,6 +84,7 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 Intent i = new Intent(RegisterActivity.this, MainActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                Log.i("Register", "Starting new activity");
                                 startActivity(i);
                                 finish();
                             }

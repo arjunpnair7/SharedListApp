@@ -4,18 +4,18 @@ import java.util.Date;
 
 public class MyListItem {
 
+    private String Completed;
     private String Date;
     private String Genre;
     private String Title;
 
-    public MyListItem(String date, String title, String genre) {
-        Date = date;
-        Genre = genre;
-        Title = title;
 
+    public String getCompleted() {
+        return Completed;
     }
 
-    public MyListItem() {
+    public void setCompleted(String completed) {
+        Completed = completed;
     }
 
     public String getDate() {
@@ -26,6 +26,14 @@ public class MyListItem {
         Date = date;
     }
 
+    public String getGenre() {
+        return Genre;
+    }
+
+    public void setGenre(String genre) {
+        Genre = genre;
+    }
+
     public String getTitle() {
         return Title;
     }
@@ -34,11 +42,13 @@ public class MyListItem {
         Title = title;
     }
 
-    public String getGenre() {
-        return Genre;
+    public MyListItem(String completed, String date, String genre, String title) {
+        Completed = completed;
+        Date = date;
+        Genre = genre;
+        Title = title;
     }
 
-    public void setGenre(String genre) {
-        Genre = genre;
+    public MyListItem() {
     }
 }

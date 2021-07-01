@@ -41,13 +41,20 @@ public class ListItemActivity extends AppCompatActivity {
 
     private TextView listTitleTv;
     private RecyclerView listItemsRecyclerView;
+    private RecyclerView completedRecyclerView;
     private DatabaseReference databaseReference;
     private FirebaseUser firebaseUser;
     private String listID;
     private List<MyListItem> listItems;
+    private List<MyListItem> completedItems;
+    private List<MyListItem> incompleteItems;
     private List<String> itemKeys;
+    private List<String> completedItemKeys;
+    private List<String> incompleteItemKeys;
     private com.google.android.material.floatingactionbutton.FloatingActionButton listItemFAB;
 
+    //To-Do
+    //Create a completed and incompleted itemKeys array
 
 
     @Override
@@ -55,12 +62,18 @@ public class ListItemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_item);
 
+        completedItems = new ArrayList<>();
+        incompleteItems = new ArrayList<>();
+
         listID = getIntent().getStringExtra(MyListsFragment.LIST_ID);
         listItems = new ArrayList<>();
         itemKeys = new ArrayList<>();
+        completedItemKeys = new ArrayList<>();
+        incompleteItemKeys = new ArrayList<>();
 
         listTitleTv = findViewById(R.id.SharedListTitleTV);
         listItemsRecyclerView = findViewById(R.id.sharedListItemRecyclerView);
+        completedRecyclerView = findViewById(R.id.completedRecyclerView);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(listItemsRecyclerView);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         listItemFAB = findViewById(R.id.sharedAddNewItemFab);
@@ -84,12 +97,29 @@ public class ListItemActivity extends AppCompatActivity {
                     itemKeys.add(element.getKey());
                     Log.i("listitemactivity", element.getKey());
                 }
+                sortLists(listItems);
 
-                MyListsItemsAdapter listsItemsAdapter = new MyListsItemsAdapter(ListItemActivity.this, listItems);
-                listsItemsAdapter.itemIDs = itemKeys;
+                MyListsItemsAdapter listsItemsAdapter = new MyListsItemsAdapter(ListItemActivity.this, incompleteItems);
+                MyListsItemsAdapter completeAdapter = new MyListsItemsAdapter(ListItemActivity.this, completedItems);
+
+                Log.i("count", "length: " + listItems.size() + " vs " + completedItems.size());
+                listsItemsAdapter.itemIDs = incompleteItemKeys;
                 listsItemsAdapter.listID = listID;
+
+                completeAdapter.itemIDs = completedItemKeys;
+                completeAdapter.listID = listID;
+
+
                 listItemsRecyclerView.setLayoutManager(new LinearLayoutManager(ListItemActivity.this));
                 listItemsRecyclerView.setAdapter(listsItemsAdapter);
+
+                completedRecyclerView.setLayoutManager(new LinearLayoutManager(ListItemActivity.this));
+                completedRecyclerView.setAdapter(completeAdapter);
+
+
+
+
+
 
             }
 
@@ -119,6 +149,7 @@ public class ListItemActivity extends AppCompatActivity {
                         newListItem.put("Genre", itemGenre.getText().toString());
                         newListItem.put("Title", itemTitle.getText().toString());
                         newListItem.put("Date", new Date().toString());
+                        newListItem.put("Completed", "False");
 
                         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid())
                                     .child("MyLists").child(listID).child("ListItems");
@@ -201,6 +232,25 @@ public class ListItemActivity extends AppCompatActivity {
 
         }
     };
+
+    private void sortLists(List<MyListItem> baseList) {
+        //Method takes in a list of all items and will then populate/update
+        //the incomplete and complete arraylists
+        completedItems.clear();
+        incompleteItems.clear();
+        incompleteItemKeys.clear();
+        completedItemKeys.clear();
+
+        for (int i = 0; i < baseList.size(); i++) {
+            if (baseList.get(i).getCompleted().equals("False")) {
+                incompleteItems.add(baseList.get(i));
+                incompleteItemKeys.add(itemKeys.get(i));
+            } else {
+                completedItems.add(baseList.get(i));
+                completedItemKeys.add(itemKeys.get(i));
+            }
+        }
+    }
 
 
 

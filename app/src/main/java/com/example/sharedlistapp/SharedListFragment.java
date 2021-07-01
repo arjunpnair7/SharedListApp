@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +21,7 @@ import com.example.sharedlistapp.Model.MyFriend;
 import com.example.sharedlistapp.Model.MyLists;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.PreferenceChangeEvent;
 
 
 public class SharedListFragment extends Fragment implements SharedListsAdapter.SharedListsCallbacks {
@@ -34,12 +38,17 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
     private com.google.android.material.floatingactionbutton.FloatingActionButton sharedListFab;
     private ValueEventListener listener1;
     private ValueEventListener listener2;
+    private ValueEventListener listener3;
+    private ChildEventListener childEventListener;
     private FirebaseUser firebaseUser;
+    public static int counter = 0;
     private List<MyLists> userSharedLists;
     private SharedListsAdapter.SharedListsCallbacks callbacks;
     public static final String SHARED_TITLE = "sharedTitle";
     public static final String SHARED_LISTS = "sharedLists";
     public static final String SHARED_CATEGORY = "sharedCategory";
+    List<String> listName;
+    List<String> listType;
 
 
 
@@ -50,6 +59,10 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_shared_list, container, false);
         callbacks = this;
+        counter = 0;
+
+         listName = new ArrayList<>();
+         listType = new ArrayList<>();
 
         userSharedLists = new ArrayList<>();
 
@@ -75,15 +88,54 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
         });
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("SharedLists");
+        ChildEventListener childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                for (DataSnapshot dataSnapshot : snapshot.child("Users").getChildren()) {
+                    MyFriend myFriend = dataSnapshot.getValue(MyFriend.class);
+                    if (myFriend.getUsername().equals(firebaseUser.getEmail())) {
+                        MyLists myLists = snapshot.getValue(MyLists.class);
+                        userSharedLists.add(myLists);
+                    }
+                }
+            }
 
-        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+
+
+
+        reference.addListenerForSingleValueEvent(listener3 = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 userSharedLists.clear();
+                int i = 0;
                 for (DataSnapshot element: snapshot.getChildren()) {
+                    Log.i("abc", i + "");
+                    i++;
                     String key = element.getKey();
                     checkIfUserIsPartOfList(firebaseUser.getEmail(), key);
                 }
+                reference.removeEventListener(listener3);
+                reference.addChildEventListener(childEventListener);
             }
 
             @Override
@@ -93,34 +145,35 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
         });
 
 
-       // SharedListsAdapter sharedListsAdapter = new SharedListsAdapter(getContext(), userSharedLists, this);
-        //sharedListRecyclerView.setAdapter(sharedListsAdapter);
         return view;
     }
 
     public void checkIfUserIsPartOfList(String userEmail, String listKey) {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("SharedLists").child(listKey).child("Users");
         userSharedLists.clear();
-        reference.addValueEventListener(listener1 = new ValueEventListener() {
+
+
+
+        reference.addListenerForSingleValueEvent(listener1 = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    userSharedLists.clear();
                     MyFriend myFriend = dataSnapshot.getValue(MyFriend.class);
-                    userSharedLists.clear();
-
                     if (myFriend.getUsername().equals(userEmail)) {
                         DatabaseReference listReference = FirebaseDatabase.getInstance().getReference().child("SharedLists").child(listKey).child("ListDetails");
-                        userSharedLists.clear();
                         listReference.addValueEventListener(listener2 = new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 MyLists myLists = snapshot.getValue(MyLists.class);
-                                Log.i("toaster", myLists.getListName());
+
                                 userSharedLists.add(myLists);
                                 Log.i("toastersize", userSharedLists.size() + "");
+
                                 SharedListsAdapter sharedListsAdapter = new SharedListsAdapter(getContext(), userSharedLists, callbacks);
                                 sharedListRecyclerView.setAdapter(sharedListsAdapter);
+
+                                listReference.removeEventListener(listener2);
+                                reference.removeEventListener(listener1);
 
                             }
 
@@ -133,11 +186,14 @@ public class SharedListFragment extends Fragment implements SharedListsAdapter.S
                 }
             }
 
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
+
         });
+        //userSharedLists.clear();
     }
 
     @Override
